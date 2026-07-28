@@ -1,0 +1,79 @@
+# ============================================================
+# 科创50行情推送机器人 - 配置文件
+# 新增指数/基金：在对应列表中添加条目即可
+# ============================================================
+
+# ---- 飞书应用凭证 ----
+feishu:
+  app_id: "cli_aabbe84b46389bb7"
+  app_secret: ""
+  # 消息接收人 open_id
+  receiver_open_id: "ou_93a145396fde272508b533a4e6e5c8b5"
+  # 飞书 API 地址（国内用 open.feishu.cn）
+  base_url: "https://open.feishu.cn"
+
+# ---- LLM 配置（用于观点归纳，可选） ----
+# 留空则使用机械汇总模式
+llm:
+  provider: ""           # openai / deepseek / 留空
+  api_key: ""            # 通过环境变量 LLM_API_KEY 覆盖更安全
+  api_base: ""           # 自定义 API 地址
+  model: ""              # 模型名称
+  # 提示词模板 — {raw_text} 会被替换为原始分析内容
+  prompt_template: |
+    请分析以下关于科创50指数的专业分析内容，用 2-3 句话归纳：
+    1. 看多观点有哪些
+    2. 看空观点有哪些
+    3. 综合判断倾向（偏多/偏空/中性）
+    直接输出归纳结果，不要加额外说明。
+
+    分析内容：
+    {raw_text}
+
+# ---- 指数配置 ----
+# 东方财富 secid 格式：市场前缀.代码
+# 市场前缀: 1=上证, 0=深证
+indices:
+  - id: "kc50"
+    secid: "1.000688"      # 科创50 指数代码
+    name: "科创50"
+    schedule: "14:45"
+    # 用于股吧代码（上证 zssh + 代码）
+    guba_code: "zssh000688"
+
+# ---- 基金配置 ----
+funds:
+  - id: "011609"
+    code: "011609"
+    name: "基金011609"
+    related_index: "kc50"
+    schedule: "17:30"
+
+# ---- 交易日历 ----
+trading_calendar:
+  # 额外关闭日（格式 YYYY-MM-DD），补充 unknown holidays
+  extra_holidays: []
+  # 额外开市日（格式 YYYY-MM-DD），如调休周六日
+  extra_trading_days: []
+
+# ---- 新闻聚合 ----
+news:
+  report_page_size: 5        # 研报获取条数
+  guba_page_size: 10         # 股吧帖子获取条数
+  # 请求间隔（秒），防反爬
+  request_interval: 1.0
+  sources:
+    - name: "东方财富研报"
+      enabled: true
+    - name: "东方财富股吧"
+      enabled: true
+
+# ---- 消息卡片 ----
+card:
+  # A 股语义：红涨绿跌
+  color_up: "#E53935"
+  color_down: "#43A047"
+  color_up_text: "#D32F2F"
+  color_down_text: "#388E3C"
+  # 风险提示文案
+  disclaimer: "以上为市场观点汇总，不构成投资建议"
