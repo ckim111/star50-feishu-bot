@@ -1,0 +1,53 @@
+﻿# 科创50行情推送 - GitHub Actions 工作流
+#
+# 触发时间（北京时间）:
+#   - 14:45 → UTC 06:45 → task_a (科创50 盘中快报)
+#   - 17:30 → UTC 09:30 → task_b (基金 011609 收盘总结)
+
+name: 科创50行情推送
+
+on:
+  schedule:
+    - cron: "45 6 * * 1-5"
+    - cron: "30 9 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "选择任务"
+        required: true
+        default: "task_a"
+        type: choice
+        options:
+          - task_a
+          - task_b
+
+jobs:
+  task_a:
+    name: 14:45 科创50盘中快报
+    if: github.event_name == "schedule" || (github.event_name == "workflow_dispatch" && inputs.task == "task_a")
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r star50_track/requirements.txt
+      - env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: cd star50_track && python -m market_monitor.task_a
+
+  task_b:
+    name: 17:30 基金收盘总结
+    if: github.event_name == "schedule" || (github.event_name == "workflow_dispatch" && inputs.task == "task_b")
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r star50_track/requirements.txt
+      - env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: cd star50_track && python -m market_monitor.task_b
